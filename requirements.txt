@@ -3,4 +3,5 @@ groq
 pillow
 PyPDF2
 python-docx
+pytesseract
 pandas
