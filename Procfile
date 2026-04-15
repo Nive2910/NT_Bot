@@ -1,0 +1,1 @@
+worker: NT_Bot.py

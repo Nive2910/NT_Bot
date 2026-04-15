@@ -1,0 +1,7 @@
+python-telegram-bot
+groq
+pytesseract
+pillow
+PyPDF2
+python-docx
+pandas
