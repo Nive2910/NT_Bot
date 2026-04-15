@@ -189,7 +189,6 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.add_handler(MessageHandler(filters.Document.ALL, handle_file))
     app.add_handler(MessageHandler(filters.PHOTO, handle_image))
-
     app.run_polling()
 
 if __name__ =="__main__":
