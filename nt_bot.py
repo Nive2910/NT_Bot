@@ -3,7 +3,6 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, Con
 from groq import Groq
 import os
 import sqlite3
-import pytesseract
 from PIL import Image
 from docx import Document
 import PyPDF2
@@ -12,7 +11,7 @@ import pandas as pd
 TOKEN = os.getenv("TOKEN")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 client = Groq(api_key=GROQ_API_KEY)
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
 
 conn = sqlite3.connect("bot.db", check_same_thread= False)
 cursor = conn.cursor()
@@ -53,8 +52,7 @@ def read_csv(file_path):
     df = pd.read_csv(file_path)
     return df.head(20).to_string()
 def read_img(file_path):
-    img = Image.open(file_path)
-    return pytesseract.image_to_string(img)
+    return "OCR is disabled in cloud deployment"
 
 def ask_ai(messages):
     response = client.chat.completions.create(
@@ -149,36 +147,9 @@ async def handle_file(update:Update, context:ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Error Occurred")
 
 async def handle_image(update:Update, context:ContextTypes.DEFAULT_TYPE):
-    try:
-        user_id = update.message.from_user.id
-        photo = update.message.photo[-1]
-        
-        os.makedirs("downloads", exist_ok=True)
-        file_path = os.path.join("downloads", "image.jpg")
-
-        file_obj = await photo.get_file()
-        await file_obj.download_to_drive(file_path)
-
-        text = read_img(file_path)
-
-        if not text.strip():
-            await update.message.reply_text("No text found")
-            return
-        
-        messages = load_memory(user_id)
-        messages.append({"role": "user", "content": text})
-
-        reply = ask_ai(messages)
-
-        save_message(user_id,"user", text)
-        save_message(user_id, "assistant", reply)
-
-        await update.message.reply_text(reply[:4000])
-
-
-    except Exception as e:
-        print(e)
-        await update.message.reply_text("error occurred")
+    await update.message.reply_text(
+        "📸 Image received, but OCR is not supported in cloud deployment."
+    )
 
 
 def main():
