@@ -1,1 +1,1 @@
-worker: python NT_Bot/NT_Bot.py
+worker: python NT_Bot.py
