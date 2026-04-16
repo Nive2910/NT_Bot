@@ -190,7 +190,7 @@ async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
 
-    app= ApplicationBuilder().token(Token).build()
+    app= ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", handle_start))
     app.add_handler(MessageHandler(filters.Regex("^(START AI|STOP AI)$"), handle_menu))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
