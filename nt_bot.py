@@ -200,12 +200,22 @@ async def init_bot():
 
 @app_web.route("/webhook", methods=["POST"])
 def webhook():
-    data = request.get_json(force=True)
-    update = Update.de_json(data, app.bot)
-    asyncio.run(app.process_update(update))
+    try:
+        data = request.get_json(force=True)
 
-    return "OK", 200 
+        if app is None or app.bot is None:
+            print("Bot not ready")
+            return "OK", 200
 
+        update = Update.de_json(data, app.bot)
+
+        asyncio.run(app.process_update(update))
+
+        return "OK", 200
+
+    except Exception as e:
+        print("WEBHOOK ERROR:", e)
+        return "OK", 200
 
 
 if __name__ =="__main__":
