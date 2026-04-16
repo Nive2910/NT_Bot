@@ -195,9 +195,14 @@ def main():
     app.add_handler(MessageHandler(filters.Regex("^(START AI|STOP AI)$"), handle_menu))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.add_handler(MessageHandler(filters.Document.ALL, handle_file))
-    app.add_handler(MessageHandler(filters.PHOTO, handle_image))
+    app.add_handler(MessageHandler(filters.PHOTO, handle_image)) 
 
-    app.run_polling()
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=int(os.environ.get("PORT", 8000)),
+        url_path="webhook",
+        webhook_url=f"{os.getenv('WEBHOOK_URL')}/webhook"
+    )
 
 if __name__ =="__main__":
     init_db()
