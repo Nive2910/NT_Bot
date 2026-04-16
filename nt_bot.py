@@ -17,21 +17,45 @@ client = Groq(api_key=GROQ_API_KEY)
 
 app_web =Flask(__name__)
 app = None
+DB_PATH = "bot.db"
 
-conn = sqlite3.connect("bot.db", check_same_thread= False)
-cursor = conn.cursor()
-cursor.execute("""CREATE TABLE IF NOT EXISTS chat_history(id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, role TEXT, content TEXT)""")
-conn.commit()
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS chat_history(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        role TEXT,
+        content TEXT
+    )
+    """)
+    conn.commit()
+    conn.close()
 
 def save_message(user_id, role, content):
-    cursor.execute("INSERT INTO chat_history(user_id, role, content) VALUES(?,?,?)",(user_id, role,content))
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO chat_history(user_id, role, content) VALUES(?,?,?)",
+        (user_id, role, content)
+    )
     conn.commit()
+    conn.close()
 
 def load_memory(user_id):
-    cursor.execute("""SELECT role,content FROM chat_history WHERE user_id =? ORDER BY id DESC LIMIT 30""",(user_id,))
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT role, content FROM chat_history
+        WHERE user_id = ?
+        ORDER BY id DESC LIMIT 30
+    """, (user_id,))
     rows = cursor.fetchall()
+    conn.close()
+
     rows.reverse()
-    return [{"role":r[0],"content":r[1]} for r in rows]
+    return [{"role": r[0], "content": r[1]} for r in rows]
 
 def chunk_text(text,size=1000):
     return [text[i:i+size] for i in range(0,len(text),size)]
@@ -184,6 +208,7 @@ def webhook():
 
 
 if __name__ =="__main__":
+    init_db()
     import threading
     def run_bot():
         asyncio.run(init_bot())
