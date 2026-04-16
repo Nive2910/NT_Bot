@@ -1,6 +1,8 @@
 python-telegram-bot
+flask
 groq
 pillow
 PyPDF2
 python-docx
+uvicorn
 pandas
