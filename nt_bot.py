@@ -193,25 +193,12 @@ async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ---------------- BOT INIT ----------------
 
 async def init_bot():
-    global app
-
     app = ApplicationBuilder().token(TOKEN).build()
-
     app.add_handler(CommandHandler("start", handle_start))
     app.add_handler(MessageHandler(filters.Regex("^(START AI|STOP AI)$"), handle_menu))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.add_handler(MessageHandler(filters.Document.ALL, handle_file))
     app.add_handler(MessageHandler(filters.PHOTO, handle_image))
-
-    await app.initialize()
-    await app.bot.set_webhook(f"{WEBHOOK_URL}/webhook")
-
-    print("Bot initialized + webhook set")
-
-# ---------------- WEBHOOK ----------------
-
-async def process(update):
-    await app.process_update(update)
 
 @app_web.route("/webhook", methods=["POST"])
 def webhook():
@@ -222,19 +209,16 @@ def webhook():
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        loop.run_until_complete(process(update))
+        loop.run_until_complete(app.process_update(update))
 
         return "OK", 200
 
     except Exception as e:
-        print("WEBHOOK ERROR:", e)
+        print("ERROR:", e)
         return "OK", 200
-
-# ---------------- MAIN ----------------
 
 if __name__ == "__main__":
     init_db()
-    asyncio.run(init_bot())
 
     port = int(os.environ.get("PORT", 8000))
     app_web.run(host="0.0.0.0", port=port)
