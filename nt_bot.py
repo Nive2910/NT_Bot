@@ -6,17 +6,14 @@ import sqlite3
 from docx import Document
 import PyPDF2
 import pandas as pd
-from flask import Flask, request
-import asyncio
+
 
 TOKEN = os.getenv("TOKEN")
-WEBHOOK_URL = os.getenv("WEBHOOK_URL")
+
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 client = Groq(api_key=GROQ_API_KEY)
 
-app_web = Flask(__name__)
-app = None
 
 DB_PATH = "bot.db"
 
@@ -190,35 +187,17 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_image(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("📸 Image received (OCR disabled in cloud)")
 
-# ---------------- BOT INIT ----------------
 
-async def init_bot():
-    app = ApplicationBuilder().token(TOKEN).build()
+def main():
+
+    app= ApplicationBuilder().token(Token).build()
     app.add_handler(CommandHandler("start", handle_start))
     app.add_handler(MessageHandler(filters.Regex("^(START AI|STOP AI)$"), handle_menu))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.add_handler(MessageHandler(filters.Document.ALL, handle_file))
     app.add_handler(MessageHandler(filters.PHOTO, handle_image))
 
-@app_web.route("/webhook", methods=["POST"])
-def webhook():
-    try:
-        data = request.get_json(force=True)
+    app.run_polling()
 
-        update = Update.de_json(data, app.bot)
-
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(app.process_update(update))
-
-        return "OK", 200
-
-    except Exception as e:
-        print("ERROR:", e)
-        return "OK", 200
-
-if __name__ == "__main__":
-    init_db()
-
-    port = int(os.environ.get("PORT", 8000))
-    app_web.run(host="0.0.0.0", port=port)
+if __name__ =="__main__":
+    main()
