@@ -7,11 +7,16 @@ from PIL import Image
 from docx import Document
 import PyPDF2
 import pandas as pd
+from flask import Flask, request
+import asyncio
 
 TOKEN = os.getenv("TOKEN")
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 client = Groq(api_key=GROQ_API_KEY)
 
+app_web =Flask(__name__)
+app = None
 
 conn = sqlite3.connect("bot.db", check_same_thread= False)
 cursor = conn.cursor()
@@ -152,7 +157,9 @@ async def handle_image(update:Update, context:ContextTypes.DEFAULT_TYPE):
     )
 
 
-def main():
+async def init_bot():
+
+    global app
 
     app= ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", handle_start))
@@ -161,10 +168,29 @@ def main():
     app.add_handler(MessageHandler(filters.Document.ALL, handle_file))
     app.add_handler(MessageHandler(filters.PHOTO, handle_image))
 
-    app.run_polling()
+    await app.start()
+    await app.initialize()
+    await app.bot.setWebhook(f"{WEBHOOK_URL}/webhook")
+    print("Bot initialized + webhook set")
+
+@app_web.route("/webhook", methods=["POST"])
+def webhook():
+    data = request.get_json(force=True)
+    update = Update.de_json(data, app.bot)
+    asyncio.run(app.process_update(update))
+
+    return "OK", 200 
+
+
 
 if __name__ =="__main__":
-    main()
+    import threading
+    def run_bot():
+        asyncio.run(init_bot())
+    threading.Thread(target=run_bot).start()
+    
+    port = int(os.environ.get("PORT", 8000))
+    app_web.run(host="0.0.0.0", port=port)
 
 
 
