@@ -192,8 +192,9 @@ async def init_bot():
     app.add_handler(MessageHandler(filters.Document.ALL, handle_file))
     app.add_handler(MessageHandler(filters.PHOTO, handle_image))
 
-    await app.start()
+    
     await app.initialize()
+    await app.start()
     await app.bot.setWebhook(f"{WEBHOOK_URL}/webhook")
     print("Bot initialized + webhook set")
 
