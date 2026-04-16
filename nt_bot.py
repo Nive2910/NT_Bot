@@ -194,7 +194,7 @@ async def init_bot():
 
     
     await app.initialize()
-    await app.start()
+    
     await app.bot.setWebhook(f"{WEBHOOK_URL}/webhook")
     print("Bot initialized + webhook set")
 
@@ -218,14 +218,21 @@ def webhook():
         return "OK", 200
 
 
-if __name__ =="__main__":
+if __name__ == "__main__":
+
     init_db()
-    import threading
-    def run_bot():
-        asyncio.run(init_bot())
-    threading.Thread(target=run_bot).start()
-    
+
     port = int(os.environ.get("PORT", 8000))
+
+    # start bot in background
+    import threading
+
+    def start_bot():
+        asyncio.run(init_bot())
+
+    threading.Thread(target=start_bot).start()
+
+    # run flask ONLY
     app_web.run(host="0.0.0.0", port=port)
 
 
