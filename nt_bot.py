@@ -152,6 +152,7 @@ async def handle_files(update:Update, context:ContextTypes.DEFAULT_TYPE):
 
             save_file_summary(user_id,file.file_name,combined_summary)
 
+            await update.message.reply_text(f"Here is the Summary of the content: {combined_summary}")
             await update.message.reply_text("Uploaded file is processed. Use/askfile <question> to ask about this file")
 
         except Exception as e:
