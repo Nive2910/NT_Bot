@@ -72,7 +72,7 @@ def read_text(file_path):
 def read_pdf(file_path):
     text=""
     with open(file_path,"rb") as f:
-        reader = PyPDF2.PdfFileReader(f)
+        reader = PyPDF2.PdfReader(f)
         for page in reader.pages:
             text += page.extract_text() or " "
 
