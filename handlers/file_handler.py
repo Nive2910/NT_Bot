@@ -5,7 +5,8 @@ import os
 from db.database import (
     save_file_summary,
     load_file_summary,
-    load_memory
+    load_memory,
+    save_message
 )
 
 from services.ai_service import ask_ai
@@ -79,6 +80,8 @@ async def handle_question(update:Update, context:ContextTypes.DEFAULT_TYPE):
                 messages.append({"role":"user", "content":question})
                 reply = ask_ai(messages)
                 await update.message.reply_text(reply)
+                save_message(user_id, "user", question)
+                save_message(user_id, "assistant", reply)
 
 
             except Exception as e:
